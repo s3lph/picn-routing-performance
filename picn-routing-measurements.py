@@ -92,7 +92,7 @@ def measure_breadth_scaling(n: int, ageing: float) -> Tuple[int, float, float, b
     fetchaddr = forwarders[-2].linklayer.sock.getsockname()
     fetch = Fetch(fetchaddr[0], fetchaddr[1], encoder=NdnTlvEncoder())
 
-    time, data = measure(fetch, repo, forwarders, timeout=n*3)
+    time, data = measure(fetch, repo, forwarders, timeout=n*ageing*3)
     return n, ageing, time, data == 'testcontent'
 
 
