@@ -63,7 +63,7 @@ def measure_depth_scaling(n: int, ageing: float) -> Tuple[int, float, float, boo
 
 def depth_measurements(n: int, ageing: float, run: int):
     measurements: List[Tuple[int, float, float, bool]] = []
-    print(f'n={n}, ageing interval={ageing}, run {run}')
+    print(f'depth n={n}, ageing interval={ageing}, run {run}')
     measurements.append(measure_depth_scaling(n, ageing))
     os.makedirs('raw', exist_ok=True)
     with open('raw/depth.csv', 'a') as f:
@@ -98,7 +98,7 @@ def measure_breadth_scaling(n: int, ageing: float) -> Tuple[int, float, float, b
 
 def breadth_measurements(n: int, ageing: float, run: int):
     measurements: List[Tuple[int, float, float, bool]] = []
-    print(f'n={n}, ageing interval={ageing}, run {run}')
+    print(f'breadth n={n}, ageing interval={ageing}, run {run}')
     measurements.append(measure_breadth_scaling(n, ageing))
     os.makedirs('raw', exist_ok=True)
     with open('raw/breadth.csv', 'a') as f:
@@ -109,11 +109,11 @@ def breadth_measurements(n: int, ageing: float, run: int):
 
 def main():
     if len(sys.argv) < 4:
-        print(f'Usage: {sys.argv[0]} <n> <run> <ageing_interval>')
+        print(f'Usage: {sys.argv[0]} <n> <ageing_interval> <run>')
         sys.exit(1)
     n = int(sys.argv[1])
-    run = int(sys.argv[2])
-    ageing_interval = float(sys.argv[3])
+    ageing_interval = float(sys.argv[2])
+    run = int(sys.argv[3])
     depth_measurements(n, ageing_interval, run)
     breadth_measurements(n, ageing_interval, run)
 
