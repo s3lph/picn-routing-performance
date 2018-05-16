@@ -1,41 +1,46 @@
 
 from typing import Dict, List
 
+import os
+
+from datetime import datetime
 from matplotlib import pyplot as plt
 
-
-def boxplot(data: Dict[int, List[float]]):
-    ns = data.keys()
-    values = data.values()
-    plt.boxplot(values, labels=ns)
-    plt.show()
+now = datetime.utcnow()
 
 
-def parse_csv(filename: str) -> Dict[int, List[float]]:
+def boxplot(data: Dict[str, Dict[int, List[float]]], basename):
+    intervals = data.keys()
+    for interval in intervals:
+        ns = data[interval].keys()
+        values = data[interval].values()
+        plt.boxplot(values, labels=ns, sym='+r')
+        plt.xlabel('nodes')
+        plt.ylabel('time [s]')
+        plt.savefig(basename.format(t=now.strftime('%s'), i=interval))
+        plt.close()
+
+
+def parse_csv(filename: str) -> Dict[str, Dict[int, List[float]]]:
     with open(filename, 'r') as f:
         raw = f.read()
     lines = [l for l in raw.split('\n') if len(l) > 0]
-    data: Dict[int, List[float]] = dict()
+    data: Dict[str, Dict[int, List[float]]] = dict()
     for l in lines:
-        n, _, t, ok = l.split(',')
+        n, interval, t, ok = l.split(',')
         if ok != 'ok':
             continue
         n = int(n)
         t = float(t)
-        if n not in data:
-            data[n] = []
-        data[n].append(t)
+        if interval not in data:
+            data[interval] = dict()
+        if n not in data[interval]:
+            data[interval][n] = list()
+        data[interval][n].append(t)
     return data
 
 
-def plot_depth():
-    boxplot(parse_csv('raw/depth.csv'))
-
-
-def plot_breadth():
-    boxplot(parse_csv('raw/breadth.csv'))
-
-
 if __name__ == '__main__':
-    plot_depth()
-    plot_breadth()
+    os.makedirs('plots', exist_ok=True)
+    boxplot(parse_csv('raw/depth.csv'), 'plots/{t}_depth_{i}.png')
+    boxplot(parse_csv('raw/breadth.csv'), 'plots/{t}_breadth_{i}.png')
