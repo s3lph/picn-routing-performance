@@ -18,6 +18,8 @@ def boxplot(data: Dict[str, Dict[int, List[float]]], basename):
         plt.boxplot(values, labels=ns, sym='+r')
         plt.xlabel('nodes')
         plt.ylabel('time [s]')
+        plt.ylim(ymin=0)
+        plt.title(f'interval = {interval}')
         plt.savefig(basename.format(t=now, i=interval))
         plt.close()
 
@@ -49,3 +51,5 @@ if __name__ == '__main__':
     os.makedirs('plots', exist_ok=True)
     boxplot(parse_csv(f'raw/{now}_depth.csv'), 'plots/{t}_depth_{i}.png')
     boxplot(parse_csv(f'raw/{now}_breadth.csv'), 'plots/{t}_breadth_{i}.png')
+    boxplot(parse_csv(f'raw/{now}_depth_rand.csv'), 'plots/{t}_depth_rand_{i}.png')
+    boxplot(parse_csv(f'raw/{now}_breadth_rand.csv'), 'plots/{t}_breadth_rand_{i}.png')

@@ -97,4 +97,14 @@ For each routing interval  in `0.5, 1.0, 2.0`, there is one plot describing the
 time until the client was able to fetch data from the repo, depending on the
 number of forwarders in the middle layer.
 
+### `depth_rand`
+
+Like `depth`, but with randomized starting order of forwarders and a small
+randomzied delay between starting the forwarders.
+
+### `breadth_rand`
+
+Like `breadth`, but with randomized starting order of forwarders and a small
+randomzied delay between starting the forwarders.
+
 [s3lph-picn]: https://github.com/s3lph/picn

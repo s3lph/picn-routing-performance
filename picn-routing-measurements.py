@@ -4,6 +4,7 @@ from typing import List, Tuple
 import sys
 import os
 import queue
+import random
 from datetime import datetime, timedelta
 from time import sleep
 
@@ -18,9 +19,13 @@ from PiCN.ProgramLibs.Fetch import Fetch
 now = ''
 
 
-def measure(fetch: Fetch, repo, forwarders, timeout: float) -> Tuple[float, str]:
+def measure(fetch: Fetch, repo, forwarders, timeout: float, random_startup_delay: bool) -> Tuple[float, str]:
     repo.start_repo()
+    if random_startup_delay:
+        random.shuffle(forwarders)
     for f in forwarders:
+        if random_startup_delay:
+            sleep(random.uniform(0.1, 0.5))
         f.start_forwarder()
     data = ''
     start_time = datetime.utcnow()
@@ -42,7 +47,7 @@ def measure(fetch: Fetch, repo, forwarders, timeout: float) -> Tuple[float, str]
     return (end_time - start_time).total_seconds(), data
 
 
-def measure_depth_scaling(n: int, ageing: float) -> Tuple[int, float, float, bool]:
+def measure_depth_scaling(n: int, ageing: float, random_startup_delay: bool) -> Tuple[int, float, float, bool]:
     forwarders: List[ICNForwarder] = []
     for i in range(n):
         forwarders.append(ICNForwarder(0, encoder=NdnTlvEncoder(), routing=True))
@@ -60,22 +65,24 @@ def measure_depth_scaling(n: int, ageing: float) -> Tuple[int, float, float, boo
     fetchaddr = forwarders[0].linklayer.sock.getsockname()
     fetch = Fetch(fetchaddr[0], fetchaddr[1], encoder=NdnTlvEncoder())
 
-    time, data = measure(fetch, repo, forwarders, timeout=n*ageing*3)
+    time, data = measure(fetch, repo, forwarders, n*ageing*3, random_startup_delay)
     return n, ageing, time, data == 'testcontent'
 
 
-def depth_measurements(n: int, ageing: float, run: int):
+def depth_measurements(n: int, ageing: float, run: int, random_startup_delay: bool = False):
+    testname = f'depth{"_rand" if random_startup_delay else ""}'
     measurements: List[Tuple[int, float, float, bool]] = []
-    print(f'depth n={n}, ageing interval={ageing}, run {run}')
-    measurements.append(measure_depth_scaling(n, ageing))
+    print(f'{testname} n={n}, ageing interval={ageing}, run {run}')
+    measurements.append(measure_depth_scaling(n, ageing, random_startup_delay))
     os.makedirs('raw', exist_ok=True)
-    with open(f'raw/{now}_depth.csv', 'a') as f:
+    filename = f'raw/{now}_{testname}.csv'
+    with open(filename, 'a') as f:
         for i, a, t, ok in measurements:
             f.write(f'{i},{a},{t},{"ok" if ok else "fail"}\n')
-    print(f'Saved data to file raw/{now}_depth.csv')
+    print(f'Saved data to file {filename}')
 
 
-def measure_breadth_scaling(n: int, ageing: float) -> Tuple[int, float, float, bool]:
+def measure_breadth_scaling(n: int, ageing: float, random_startup_delay: bool) -> Tuple[int, float, float, bool]:
     forwarders: List[ICNForwarder] = []
     for i in range(n):
         forwarders.append(ICNForwarder(0, encoder=NdnTlvEncoder(), routing=True))
@@ -95,19 +102,21 @@ def measure_breadth_scaling(n: int, ageing: float) -> Tuple[int, float, float, b
     fetchaddr = forwarders[-2].linklayer.sock.getsockname()
     fetch = Fetch(fetchaddr[0], fetchaddr[1], encoder=NdnTlvEncoder())
 
-    time, data = measure(fetch, repo, forwarders, timeout=n*ageing*3)
+    time, data = measure(fetch, repo, forwarders, n*ageing*3, random_startup_delay)
     return n, ageing, time, data == 'testcontent'
 
 
-def breadth_measurements(n: int, ageing: float, run: int):
+def breadth_measurements(n: int, ageing: float, run: int, random_startup_delay: bool = False):
+    testname = f'breadth{"_rand" if random_startup_delay else ""}'
     measurements: List[Tuple[int, float, float, bool]] = []
-    print(f'breadth n={n}, ageing interval={ageing}, run {run}')
-    measurements.append(measure_breadth_scaling(n, ageing))
+    print(f'{testname} n={n}, ageing interval={ageing}, run {run}')
+    measurements.append(measure_breadth_scaling(n, ageing, random_startup_delay))
     os.makedirs('raw', exist_ok=True)
-    with open(f'raw/{now}_breadth.csv', 'a') as f:
+    filename = f'raw/{now}_{testname}.csv'
+    with open(filename, 'a') as f:
         for i, a, t, ok in measurements:
             f.write(f'{i},{a},{t},{"ok" if ok else "fail"}\n')
-    print(f'Saved data to file raw/{now}_breadth.csv')
+    print(f'Saved data to file {filename}')
 
 
 def main():
@@ -121,6 +130,8 @@ def main():
     run = int(sys.argv[4])
     depth_measurements(n, ageing_interval, run)
     breadth_measurements(n, ageing_interval, run)
+    depth_measurements(n, ageing_interval, run, random_startup_delay=True)
+    breadth_measurements(n, ageing_interval, run, random_startup_delay=True)
 
 
 if __name__ == '__main__':
