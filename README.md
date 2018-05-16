@@ -23,8 +23,8 @@ Dependencies:
   - Matplotlib
 
 ```sh
-./setup.py
-./run.py
+./setup.sh
+./run.sh
 ```
 
 ## Results
@@ -51,12 +51,7 @@ remain constant in the plot.
 
 #### Test Setup
 
-```
-C <--> F <--> F <-- ... --> F <--> R
-
-      \______________________/
-            n forwarders
-```
+!["depth" test case setup](img/depth.png)
 
 #### Parameters
 
@@ -73,18 +68,7 @@ number of forwarders in between.
 
 #### Test Setup
 
-```
-            ,-> F <-.
-            |       |
-            |-> F <-|
-           /    :    \
-C <--> F <-     :     -> F <--> R
-           \    :    /
-            |-> F <-|
-            |       |
-            `-> F <-'
-
-```
+!["breadth" test case setup](img/breadth.png)
 
 #### Parameters
 

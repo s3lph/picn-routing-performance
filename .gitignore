@@ -7,3 +7,7 @@
 picn/
 raw/
 plots/
+
+img/*.aux
+img/*.log
+img/*.pdf
