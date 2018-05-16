@@ -1,12 +1,13 @@
 
 from typing import Dict, List
 
+import sys
 import os
 
-from datetime import datetime
-from matplotlib import pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
 
-now = datetime.utcnow()
+import matplotlib.pyplot as plt
 
 
 def boxplot(data: Dict[str, Dict[int, List[float]]], basename):
@@ -17,7 +18,7 @@ def boxplot(data: Dict[str, Dict[int, List[float]]], basename):
         plt.boxplot(values, labels=ns, sym='+r')
         plt.xlabel('nodes')
         plt.ylabel('time [s]')
-        plt.savefig(basename.format(t=now.strftime('%s'), i=interval))
+        plt.savefig(basename.format(t=now, i=interval))
         plt.close()
 
 
@@ -41,6 +42,10 @@ def parse_csv(filename: str) -> Dict[str, Dict[int, List[float]]]:
 
 
 if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print(f'{sys.argv[0]} <timestamp>')
+        exit(1)
+    now = sys.argv[1]
     os.makedirs('plots', exist_ok=True)
-    boxplot(parse_csv('raw/depth.csv'), 'plots/{t}_depth_{i}.png')
-    boxplot(parse_csv('raw/breadth.csv'), 'plots/{t}_breadth_{i}.png')
+    boxplot(parse_csv(f'raw/{now}_depth.csv'), 'plots/{t}_depth_{i}.png')
+    boxplot(parse_csv(f'raw/{now}_breadth.csv'), 'plots/{t}_breadth_{i}.png')

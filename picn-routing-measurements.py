@@ -15,6 +15,9 @@ from PiCN.ProgramLibs.ICNDataRepository import ICNDataRepository
 from PiCN.ProgramLibs.Fetch import Fetch
 
 
+now = ''
+
+
 def measure(fetch: Fetch, repo, forwarders, timeout: float) -> Tuple[float, str]:
     repo.start_repo()
     for f in forwarders:
@@ -66,10 +69,10 @@ def depth_measurements(n: int, ageing: float, run: int):
     print(f'depth n={n}, ageing interval={ageing}, run {run}')
     measurements.append(measure_depth_scaling(n, ageing))
     os.makedirs('raw', exist_ok=True)
-    with open('raw/depth.csv', 'a') as f:
+    with open(f'raw/{now}_depth.csv', 'a') as f:
         for i, a, t, ok in measurements:
             f.write(f'{i},{a},{t},{"ok" if ok else "fail"}\n')
-    print('Saved data to file raw/depth.csv')
+    print(f'Saved data to file raw/{now}_depth.csv')
 
 
 def measure_breadth_scaling(n: int, ageing: float) -> Tuple[int, float, float, bool]:
@@ -101,19 +104,21 @@ def breadth_measurements(n: int, ageing: float, run: int):
     print(f'breadth n={n}, ageing interval={ageing}, run {run}')
     measurements.append(measure_breadth_scaling(n, ageing))
     os.makedirs('raw', exist_ok=True)
-    with open('raw/breadth.csv', 'a') as f:
+    with open(f'raw/{now}_breadth.csv', 'a') as f:
         for i, a, t, ok in measurements:
             f.write(f'{i},{a},{t},{"ok" if ok else "fail"}\n')
-    print('Saved data to file raw/breadth.csv')
+    print(f'Saved data to file raw/{now}_breadth.csv')
 
 
 def main():
-    if len(sys.argv) < 4:
-        print(f'Usage: {sys.argv[0]} <n> <ageing_interval> <run>')
-        sys.exit(1)
-    n = int(sys.argv[1])
-    ageing_interval = float(sys.argv[2])
-    run = int(sys.argv[3])
+    global now
+    if len(sys.argv) < 5:
+        print(f'Usage: {sys.argv[0]} <timestamp> <n> <ageing_interval> <run>')
+        exit(1)
+    now = sys.argv[1]
+    n = int(sys.argv[2])
+    ageing_interval = float(sys.argv[3])
+    run = int(sys.argv[4])
     depth_measurements(n, ageing_interval, run)
     breadth_measurements(n, ageing_interval, run)
 
