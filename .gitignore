@@ -4,5 +4,6 @@
 .idea/
 *.iml
 
+picn/
 raw/
 plots/
