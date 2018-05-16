@@ -79,7 +79,7 @@ def depth_measurements(n: int, ageing: float, run: int, random_startup_delay: bo
     with open(filename, 'a') as f:
         for i, a, t, ok in measurements:
             f.write(f'{i},{a},{t},{"ok" if ok else "fail"}\n')
-    print(f'Saved data to file {filename}')
+    print(f'Wrote data to file {filename}')
 
 
 def measure_breadth_scaling(n: int, ageing: float, random_startup_delay: bool) -> Tuple[int, float, float, bool]:
@@ -116,22 +116,27 @@ def breadth_measurements(n: int, ageing: float, run: int, random_startup_delay: 
     with open(filename, 'a') as f:
         for i, a, t, ok in measurements:
             f.write(f'{i},{a},{t},{"ok" if ok else "fail"}\n')
-    print(f'Saved data to file {filename}')
+    print(f'Wrote data to file {filename}')
 
 
 def main():
     global now
-    if len(sys.argv) < 5:
-        print(f'Usage: {sys.argv[0]} <timestamp> <n> <ageing_interval> <run>')
+    if len(sys.argv) < 6:
+        print(f'Usage: {sys.argv[0]} <timestamp> <case> <n> <ageing_interval> <run>')
         exit(1)
     now = sys.argv[1]
-    n = int(sys.argv[2])
-    ageing_interval = float(sys.argv[3])
-    run = int(sys.argv[4])
-    depth_measurements(n, ageing_interval, run)
-    breadth_measurements(n, ageing_interval, run)
-    depth_measurements(n, ageing_interval, run, random_startup_delay=True)
-    breadth_measurements(n, ageing_interval, run, random_startup_delay=True)
+    case = sys.argv[2]
+    n = int(sys.argv[3])
+    ageing_interval = float(sys.argv[4])
+    run = int(sys.argv[5])
+    if case == 'depth':
+        depth_measurements(n, ageing_interval, run)
+    elif case == 'breadth':
+        breadth_measurements(n, ageing_interval, run)
+    elif case == 'depth_rand':
+        depth_measurements(n, ageing_interval, run, random_startup_delay=True)
+    elif case == 'breadth_rand':
+        breadth_measurements(n, ageing_interval, run, random_startup_delay=True)
 
 
 if __name__ == '__main__':
