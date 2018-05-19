@@ -12,11 +12,11 @@
   \node[draw, shape=circle, right of=ellipsis, right=5pt] (fn) {F};
   \node[draw, shape=circle, right of=fn, right=20pt] (r) {R};
   
-  \path[draw, <->] (c) to (f1);
-  \path[draw, <->] (f1) to (f2);
-  \path[draw, <-] (f2) to (ellipsis);
-  \path[draw, ->] (ellipsis) to (fn);
-  \path[draw, <->] (fn) to (r);
+  \path[draw, -] (c) to (f1);
+  \path[draw, -] (f1) to (f2);
+  \path[draw, -] (f2) to (ellipsis);
+  \path[draw, -] (ellipsis) to (fn);
+  \path[draw, -] (fn) to (r);
 
   \draw[decorate, decoration={brace, mirror, amplitude=10pt}]
   ([yshift=-15pt] f1.west) -- ([yshift=-15pt] fn.east)

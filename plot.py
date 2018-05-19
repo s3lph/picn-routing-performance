@@ -12,13 +12,15 @@ import matplotlib.pyplot as plt
 
 def boxplot(data: Dict[str, Dict[int, List[float]]], basename):
     intervals = data.keys()
+    ymax = max([v for n in data.values() for i in n.values() for v in i])
     for interval in intervals:
         ns = data[interval].keys()
         values = data[interval].values()
-        plt.boxplot(values, labels=ns, sym='+r')
+        plt.figure()
+        plt.boxplot(values, labels=ns, sym='+r', medianprops=dict(linestyle='-', color='black'))
         plt.xlabel('nodes')
         plt.ylabel('time [s]')
-        plt.ylim(ymin=0)
+        plt.ylim(ymin=0, ymax=ymax * 1.1)
         plt.title(f'interval = {interval}')
         plt.savefig(basename.format(t=now, i=interval))
         plt.close()

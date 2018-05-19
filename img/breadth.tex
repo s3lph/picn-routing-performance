@@ -17,16 +17,16 @@
   \node[draw, shape=circle, right of=ellipsis, right=20pt] (fr) {F};
   \node[draw, shape=circle, right of=fr, right=20pt] (r) {R};
 
-  \path[draw, <->] (c) to (fc);
-  \path[draw, <->] (fr) to (r);
-  \path[draw, <->] (fc) to (f1);
-  \path[draw, <->] (fc) to (f2);
-  \path[draw, <->] (fc) to (f3);
-  \path[draw, <->] (fc) to (f4);
-  \path[draw, <->] (fr) to (f1);
-  \path[draw, <->] (fr) to (f2);
-  \path[draw, <->] (fr) to (f3);
-  \path[draw, <->] (fr) to (f4);
+  \path[draw, -] (c) to (fc);
+  \path[draw, -] (fr) to (r);
+  \path[draw, -] (fc) to (f1);
+  \path[draw, -] (fc) to (f2);
+  \path[draw, -] (fc) to (f3);
+  \path[draw, -] (fc) to (f4);
+  \path[draw, -] (fr) to (f1);
+  \path[draw, -] (fr) to (f2);
+  \path[draw, -] (fr) to (f3);
+  \path[draw, -] (fr) to (f4);
 
   \draw[decorate, decoration={brace, amplitude=10pt}]
   ([xshift=15pt] f1.north) -- ([xshift=15pt] f4.south)
