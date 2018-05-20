@@ -21,7 +21,7 @@ for case in repo_hopping repo_hopping_edge_traverse; do
         for run in `seq 1 20`; do
           timeout -k 5s -s TERM 70s env PYTHONPATH="$(realpath ./picn)" \
                   python3.6 picn-routing-measurements.py $timestamp $case $run \
-                      $routing_interval $hopping_interval $(($hopping_interval*$lease_time)) \
+                      $routing_interval $hopping_interval $(bc <<<"$hopping_interval*$lease_time") \
               || echo Timeout
         done
       done

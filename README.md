@@ -18,6 +18,7 @@ docker run -d -v $(realpath raw):/raw -v $(realpath plots):/plots <image id>
 Dependencies:
 
   - git
+  - bc
   - Python >= 3.6
   - pip
   - Matplotlib
