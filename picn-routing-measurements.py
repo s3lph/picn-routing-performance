@@ -296,6 +296,10 @@ def measure_repo_hopping(routing_interval: float, hopping_interval: float, lease
     success = len(satisfied_interests)
     success_outoforder = len(satisfied_interests_outoforder)
     fetch.stop_all()
+    for f in nodes.values():
+        f.stop_forwarder()
+    if repo is not None:
+        repo.stop_repo()
     with lock:
         running = False
     return success / n, success_outoforder / n, avgduration / success if success > 0 else 0.0
@@ -354,7 +358,7 @@ def main():
         breadth_measurements(n, ageing_interval, run, random_startup_delay=True)
     elif case == 'repo_hopping':
         if len(sys.argv) < 7:
-            print(f'Usage: {sys.argv[0]} {now} {case} {run} <routing_interval> <hopping_interval> <lease_time')
+            print(f'Usage: {sys.argv[0]} {now} {case} {run} <routing_interval> <hopping_interval> <lease_time>')
             exit(1)
         routing_interval = float(sys.argv[4])
         hopping_interval = float(sys.argv[5])
