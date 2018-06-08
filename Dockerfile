@@ -1,6 +1,5 @@
-FROM base/archlinux
+FROM pritunl/archlinux:2018-06-02
 
-RUN pacman -Syu --noconfirm
 RUN pacman -S --noconfirm python python-pip git bc
 RUN pip install matplotlib
 COPY . .
