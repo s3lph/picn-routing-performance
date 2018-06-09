@@ -1,3 +1,4 @@
+#!/usr/bin/env python3.6
 
 from typing import List, Tuple, Dict
 
@@ -27,6 +28,7 @@ from PiCN.ProgramLibs.Fetch import Fetch
 
 now = ''
 repo: ICNDataRepository = None
+dumpster = list()
 edge_index = -1
 lock = threading.Lock()
 running = True
@@ -131,9 +133,12 @@ def breadth_measurements(n: int, ageing: float, run: int, random_startup_delay: 
             f.write(f'{i},{a},{t},{"ok" if ok else "fail"}\n')
     print(f'Wrote data to file {filename}')
 
-
-def measure_repo_hopping(routing_interval: float, hopping_interval: float, lease_time: float, edge_traverse: bool)\
-        -> Tuple[float, float, float]:
+    
+def measure_repo_hopping(run: int, routing_interval: float, hopping_interval: float, lease_time: float,
+                         edge_traverse: bool = False):
+    testname = f'repo_hopping{"_edge_traverse" if edge_traverse else ""}'
+    print(f'{testname} routing interval={routing_interval}, hopping interval={hopping_interval}, lease time=' +
+          f'{lease_time}, run {run}')
     global repo, lock, running
     manager = multiprocessing.Manager()
     autoconfig_edgeprefix: List[Tuple[Name, bool]] = [(Name('/edge'), False)]
@@ -229,7 +234,8 @@ def measure_repo_hopping(routing_interval: float, hopping_interval: float, lease
     def repo_hop():
         global repo, edge_index, lock, running
         if repo is not None:
-            repo.stop_repo()
+            repo.linklayer.sock.close()
+            dumpster.append(repo)
         with lock:
             if not running:
                 return
@@ -295,30 +301,20 @@ def measure_repo_hopping(routing_interval: float, hopping_interval: float, lease
             satisfied_interests[i] = True
     success = len(satisfied_interests)
     success_outoforder = len(satisfied_interests_outoforder)
+    os.makedirs('raw', exist_ok=True)
+    filename = f'raw/{now}_{testname}.csv'
+    with open(filename, 'a') as f:
+        f.write(f'{routing_interval},{hopping_interval},{lease_time},{success / n},{success_outoforder / n},{avgduration / success if success > 0 else 0.0}\n')
+    print(f'Wrote data to file {filename}')
     fetch.stop_all()
     for f in nodes.values():
         f.stop_forwarder()
     if repo is not None:
         repo.stop_repo()
+    for r in dumpster:
+        r.stop_repo()
     with lock:
         running = False
-    return success / n, success_outoforder / n, avgduration / success if success > 0 else 0.0
-
-
-def repo_hopping_measurements(run: int, routing_interval: float, hopping_interval: float, lease_time: float,
-                              edge_traverse: bool = False):
-    testname = f'repo_hopping{"_edge_traverse" if edge_traverse else ""}'
-    measurements: List[Tuple[float, float, float]] = []
-    print(f'{testname} routing interval={routing_interval}, hopping interval={hopping_interval}, lease time=' +
-          f'{lease_time}, run {run}')
-    measurements.append(measure_repo_hopping(routing_interval, hopping_interval, lease_time, edge_traverse))
-    os.makedirs('raw', exist_ok=True)
-    filename = f'raw/{now}_{testname}.csv'
-    with open(filename, 'a') as f:
-        for success, succes_outoforder, avg in measurements:
-            f.write(f'{routing_interval},{hopping_interval},{lease_time},{success},{succes_outoforder},{avg}\n')
-    print(f'Wrote data to file {filename}')
-
 
 def main():
     global now
@@ -363,7 +359,7 @@ def main():
         routing_interval = float(sys.argv[4])
         hopping_interval = float(sys.argv[5])
         lease_time = float(sys.argv[6])
-        repo_hopping_measurements(run, routing_interval, hopping_interval, lease_time)
+        measure_repo_hopping(run, routing_interval, hopping_interval, lease_time)
     elif case == 'repo_hopping_edge_traverse':
         if len(sys.argv) < 7:
             print(f'Usage: {sys.argv[0]} {now} {case} {run} <routing_interval> <hopping_interval> <lease_time>')
@@ -371,7 +367,7 @@ def main():
         routing_interval = float(sys.argv[4])
         hopping_interval = float(sys.argv[5])
         lease_time = float(sys.argv[6])
-        repo_hopping_measurements(run, routing_interval, hopping_interval, lease_time, edge_traverse=True)
+        measure_repo_hopping(run, routing_interval, hopping_interval, lease_time, edge_traverse=True)
 
 
 if __name__ == '__main__':
