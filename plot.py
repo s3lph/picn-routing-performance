@@ -11,9 +11,8 @@ import matplotlib.pyplot as plt
 import matplotlib.lines
 
 
-def scaling_boxplot(data: Dict[str, Dict[int, List[float]]], basename):
+def scaling_boxplot(data: Dict[str, Dict[int, List[float]]], basename, ymax: float):
     intervals = data.keys()
-    ymax = max([v for n in data.values() for i in n.values() for v in i])
     for interval in intervals:
         ns = data[interval].keys()
         values = data[interval].values()
@@ -47,10 +46,19 @@ def parse_scaling_csv(filename: str) -> Dict[str, Dict[int, List[float]]]:
 
 
 def plot_scaling():
-    scaling_boxplot(parse_scaling_csv(f'raw/{now}_depth.csv'), 'plots/{t}_depth_{i}.png')
-    scaling_boxplot(parse_scaling_csv(f'raw/{now}_breadth.csv'), 'plots/{t}_breadth_{i}.png')
-    scaling_boxplot(parse_scaling_csv(f'raw/{now}_depth_rand.csv'), 'plots/{t}_depth_rand_{i}.png')
-    scaling_boxplot(parse_scaling_csv(f'raw/{now}_breadth_rand.csv'), 'plots/{t}_breadth_rand_{i}.png')
+    depth_data = parse_scaling_csv(f'raw/{now}_depth.csv')
+    depth_rand_data = parse_scaling_csv(f'raw/{now}_depth_rand.csv')
+    depth_ymax = max(max([v for n in depth_data.values() for i in n.values() for v in i]),
+                     max([v for n in depth_rand_data.values() for i in n.values() for v in i]))
+    scaling_boxplot(depth_data, 'plots/{t}_depth_{i}.png', depth_ymax)
+    scaling_boxplot(depth_rand_data, 'plots/{t}_depth_rand_{i}.png', depth_ymax)
+
+    breadth_data = parse_scaling_csv(f'raw/{now}_breadth.csv')
+    breadth_rand_data = parse_scaling_csv(f'raw/{now}_breadth_rand.csv')
+    breadth_ymax = max(max([v for n in breadth_data.values() for i in n.values() for v in i]),
+                       max([v for n in breadth_rand_data.values() for i in n.values() for v in i]))
+    scaling_boxplot(breadth_data, 'plots/{t}_breadth_{i}.png', breadth_ymax)
+    scaling_boxplot(breadth_rand_data, 'plots/{t}_breadth_rand_{i}.png', breadth_ymax)
 
 
 def parse_hopping_csv(filename: str):
