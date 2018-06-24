@@ -95,7 +95,7 @@ def mkcolor(val: float, low: str, high: str) -> str:
 
 
 def hopping_plot_single_vars(data: Dict[Tuple[str, str, str], Tuple[List[float], List[float], List[float]]],
-                             basename: str):
+                             basename: str, duration_ymax: float):
     routing_intervals = sorted(list(set([k[0] for k in data.keys()])), key=lambda x: float(x))
     hopping_intervals = sorted(list(set([k[1] for k in data.keys()])), key=lambda x: float(x))
     lease_timeouts = sorted(list(set([k[2] for k in data.keys()])), key=lambda x: float(x))
@@ -121,8 +121,6 @@ def hopping_plot_single_vars(data: Dict[Tuple[str, str, str], Tuple[List[float],
         lsvals.append([x for k in keys for x in data[k][0]])
         ldvals.append([x for k in keys for x in data[k][2]])
 
-    duration_ymax: float = max(max(max(rdvals)), max(max(hdvals)), max(max(ldvals)))
-
     plt.figure()
     plt.boxplot(rsvals,
                 positions=[float(x) for x in routing_intervals],
@@ -130,7 +128,7 @@ def hopping_plot_single_vars(data: Dict[Tuple[str, str, str], Tuple[List[float],
                 sym='+r',
                 whis=[5, 95],
                 medianprops=dict(linestyle='-', color='black'))
-    plt.xlabel('routing interval [s]')
+    plt.xlabel('RIB exchange interval [s]')
     plt.ylabel('success rate')
     plt.ylim(ymin=0, ymax=1.1)
     plt.savefig(basename.format(t=now, r='success', var='r'))
@@ -169,7 +167,7 @@ def hopping_plot_single_vars(data: Dict[Tuple[str, str, str], Tuple[List[float],
                 sym='+r',
                 whis=[5, 95],
                 medianprops=dict(linestyle='-', color='black'))
-    plt.xlabel('routing interval [s]')
+    plt.xlabel('RIB exchange interval [s]')
     plt.ylabel('average duration [s]')
     plt.ylim(ymin=0, ymax=duration_ymax)
     plt.savefig(basename.format(t=now, r='duration', var='r'))
@@ -260,7 +258,7 @@ def hopping_plot_success_rate_l_vs_h(data: Dict[Tuple[str, str, str], Tuple[List
                    handles=[upper_bound, mean_proxy, lower_bound])
         plt.xlabel('prefix lease time [s]')
         plt.ylabel('hopping interval [s]')
-        plt.title(f'routing interval = {routing_interval}s')
+        plt.title(f'RIB exchange interval = {routing_interval}s')
         plt.savefig(basename.format(t=now, i=routing_interval))
         plt.close()
 
@@ -325,7 +323,7 @@ def hopping_plot_success_rate_l_vs_r(data: Dict[Tuple[str, str, str], Tuple[List
                    loc='lower right',
                    bbox_to_anchor=(0.9, 0.0))
         plt.xlabel('prefix lease time [s]')
-        plt.ylabel('routing interval [s]')
+        plt.ylabel('RIB exchange interval [s]')
         plt.title(f'hopping interval = {hopping_interval}s')
         plt.savefig(basename.format(r='success', t=now, i=hopping_interval))
         plt.close()
@@ -333,12 +331,25 @@ def hopping_plot_success_rate_l_vs_r(data: Dict[Tuple[str, str, str], Tuple[List
 
 def plot_hopping():
     data = parse_hopping_csv(f'raw/{now}_repo_hopping.csv')
-    hopping_plot_single_vars(data, 'plots/{t}_repo_hopping_{r}_{var}.png')
+    data_et = parse_hopping_csv(f'raw/{now}_repo_hopping_edge_traverse.csv')
+
+    # Remove data points with 0% success rate from the duration pool.
+    # Also, remove a single extreme duration outlier from the plot, as it massively distorted the scale.
+    # This removal is mentioned in the thesis.
+    outlierval = data[('2.0', '5.0', '2.5')]
+    s, sooo, t = outlierval
+    t = [x for x in t if x < 0.64 and x != 0.0]
+    data[('2.0', '5.0', '2.5')] = (s, sooo, t)
+
+    data_max: float = max([max(x[2]) for x in data.values()])
+    data_et_max: float = max([max(x[2]) for x in data.values()])
+    duration_ymax: float = max(data_max, data_et_max) * 1.1
+
+    hopping_plot_single_vars(data, 'plots/{t}_repo_hopping_{r}_{var}.png', duration_ymax)
     hopping_plot_success_rate_l_vs_h(data, 'plots/{t}_repo_hopping_success_l_vs_h_{i}.png')
     hopping_plot_success_rate_l_vs_r(data, 'plots/{t}_repo_hopping_{r}_l_vs_r_{i}.png')
 
-    data_et = parse_hopping_csv(f'raw/{now}_repo_hopping_edge_traverse.csv')
-    hopping_plot_single_vars(data_et, 'plots/{t}_repo_hopping_edge_traverse_{r}_{var}.png')
+    hopping_plot_single_vars(data_et, 'plots/{t}_repo_hopping_edge_traverse_{r}_{var}.png', duration_ymax)
     hopping_plot_success_rate_l_vs_h(data_et, 'plots/{t}_repo_hopping_edge_traverse_success_l_vs_h_{i}.png')
     hopping_plot_success_rate_l_vs_r(data_et, 'plots/{t}_repo_hopping_edge_traverse_{r}_l_vs_r_{i}.png')
 
