@@ -132,7 +132,17 @@ moved to another forwarder.
 
 #### Plots
 
-TBD
+For each of the three parameters (short: `r`, `h` and `l`), there is a boxplot
+displaying the **success rate** in dependence of this parameter.
+
+For each of `r`, `h` and `l`, there is a boxplot displaying the **average
+duration** in dependence of this parameter.
+
+Additionally, there are bubble plots showing success rates depending on the
+following combinations of parameters:
+
+- `l` vs `h`, separate plots for constant values of `r`
+- `l` vs `r`, separate plots for constant values of `h`
 
 ### `repo_hopping_edge_traverse`
 
